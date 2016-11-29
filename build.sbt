@@ -14,7 +14,7 @@ licenses := Seq("Apache License 2.0" -> url("http://opensource.org/licenses/Apac
 
 homepage := Some(url("https://github.com/ScalaConsultants/reactive-rabbit"))
 
-scalaVersion := "2.12.0"
+scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq("2.11.8", "2.12.0")
 
@@ -35,11 +35,10 @@ libraryDependencies ++= Seq(
 publishMavenStyle := true
 
 publishTo := {
-  val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value)
-    Some("snapshots" at nexus + "content/repositories/snapshots")
+    Some("Artifactory Realm" at "http://52.211.152.69:8081/artifactory/libs-snapshot-local;build.timestamp=" + new java.util.Date().getTime)
   else
-    Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    Some("Artifactory Realm" at "http://52.211.152.69:8081/artifactory/libs-release-local")
 }
 
 pomIncludeRepository := {
