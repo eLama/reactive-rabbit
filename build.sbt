@@ -4,7 +4,7 @@ sonatypeSettings
 
 name := "reactive-rabbit"
 
-version := "1.1.4.1"
+version := "1.1.4.3"
 
 organization := "io.scalac"
 
@@ -27,6 +27,7 @@ libraryDependencies ++= Seq(
   "com.typesafe"             %  "config"                   % "1.3.0",            // Configuration
   "com.google.guava"         %  "guava"                    % "19.0",             // for MediaType
   "com.google.code.findbugs" %  "jsr305"                   % "3.0.1",
+  "org.slf4j"                %  "slf4j-api"                % "1.7.19",
   "org.scalatest"            %% "scalatest"                % "3.0.1"   % "test", // for TCK
   "org.reactivestreams"      %  "reactive-streams-tck"     % "1.0.0"   % "test",
   "com.typesafe.akka"        %% "akka-stream"              % "2.4.12"  % "test"

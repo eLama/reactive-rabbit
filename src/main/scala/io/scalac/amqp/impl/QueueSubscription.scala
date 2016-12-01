@@ -4,6 +4,7 @@ import com.google.common.primitives.Ints.saturatedCast
 import com.rabbitmq.client._
 import io.scalac.amqp.Delivery
 import org.reactivestreams.{Subscriber, Subscription}
+import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.collection.immutable.Queue
@@ -25,6 +26,7 @@ private[amqp] class QueueSubscription(channel: Channel, queue: String, subscribe
   val running = Ref(false)
   var closeRequested = Ref(false)
   val shutdownListeners = Ref(List[Listener]())
+  val logger = LoggerFactory.getLogger(getClass)
 
   override def handleCancel(consumerTag: String) = {
     closeAndComplete()
@@ -114,10 +116,15 @@ private[amqp] class QueueSubscription(channel: Channel, queue: String, subscribe
     shutdownListeners.single.get.foreach(_())
   }
 
-  private def closeAndComplete(): Unit = close(subscriber.onComplete, subscriber.onError)
+  private def closeAndComplete(): Unit = {
+    logger.info("publisher finished")
+    close(subscriber.onComplete, subscriber.onError)
+  }
 
-  private def closeWithError(t: Throwable): Unit =
+  private def closeWithError(t: Throwable): Unit = {
+    logger.warn("publisher finished with error: {}", t)
     close(() => subscriber.onError(t), _ => subscriber.onError(t))
+  }
 
   private val nop = () => ()
 
@@ -125,6 +132,7 @@ private[amqp] class QueueSubscription(channel: Channel, queue: String, subscribe
     onSuccess: () => Unit = nop,
     onError: Throwable => Unit = subscriber.onError
   ): Unit = {
+    logger.info("publisher closed")
     if (closeRequested.single.compareAndSet(false, true)) {
       try {
         closeChannel()

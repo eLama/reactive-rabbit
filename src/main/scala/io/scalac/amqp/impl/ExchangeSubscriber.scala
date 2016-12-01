@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference
 import com.rabbitmq.client.Channel
 import io.scalac.amqp.Routed
 import org.reactivestreams.{Subscriber, Subscription}
+import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
 import scala.collection.immutable.Queue
@@ -17,6 +18,8 @@ import scala.util.control.NonFatal
 private[amqp] class ExchangeSubscriber(channel: Channel, exchange: String)
   extends Subscriber[Routed] {
   require(exchange.length <= 255, "exchange.length > 255")
+
+  val log = LoggerFactory.getLogger(getClass)
 
   val active = new AtomicReference[Subscription]()
   val publishingThreadRunning = Ref(false)
@@ -70,12 +73,14 @@ private[amqp] class ExchangeSubscriber(channel: Channel, exchange: String)
   /** Double check before calling `close`. Second `close` on channel kills connection.*/
   private def closeChannel(): Unit = {
     if (closeRequested.single.compareAndSet(false, true) && channel.isOpen()) {
+      log.info("closing channel")
       channel.close()
     }
   }
 
   /** Our life cycle is bounded to underlying `Channel`. */
   override def onError(t: Throwable): Unit = {
+    log.warn("error happened in ExchangeSubscriber: {}", t)
     requireNonNull(t)
     shutdownWhenFinished()
   }
